@@ -108,25 +108,45 @@ end
 
 if Config.Target then 
 	if Config.TargetName == '' then return print('You left your target name empty!') end 
-	for i = 1, #Config.Targets do
-		local target = Config.Targets[i]
-		exports[Config.TargetName]:AddBoxZone(target.name, vector3(target.x, target.y, target.z), target.width, target.length, {
-			name=target.name,
-			heading=0.0,
-			debugPoly=false,
-			minZ=target.minZ,
-			maxZ=target.maxZ,
-		}, {
-			options = {
-				{
-					event = "dInsurance:openInsuranceShop",
-					icon = "fas fa-car",
-					label = target.label,
-					job = 'all',
+	if Config.TargetName == 'ox_target' then 
+		for i = 1, #Config.Targets do 
+			local target = Config.Targets[i]
+			exports.[Config.TargetName]:addBoxZone({
+				coords = vec3(target.x, target.y, target.z),
+				size = vec3(target.width, target.length, 2),
+				rotation = 45,
+				debug = false,
+				options = {
+					{
+						name = target.name,
+						event = "dInsurance:openInsuranceShop",
+						icon = "fas fa-car",
+						label = target.label,
+					}
+				}
+			})
+		end
+	else
+		for i = 1, #Config.Targets do
+			local target = Config.Targets[i]
+			exports[Config.TargetName]:AddBoxZone(target.name, vector3(target.x, target.y, target.z), target.width, target.length, {
+				name=target.name,
+				heading=0.0,
+				debugPoly=false,
+				minZ=target.minZ,
+				maxZ=target.maxZ,
+			}, {
+				options = {
+					{
+						event = "dInsurance:openInsuranceShop",
+						icon = "fas fa-car",
+						label = target.label,
+						job = 'all',
+					},
 				},
-			},
-			distance = target.distance
-		})
+				distance = target.distance
+			})
+		end
 	end
 end
 	

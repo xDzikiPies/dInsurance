@@ -6,7 +6,7 @@ lua54 'yes'
 
 author 'DzikiPies'
 
-version '1.0.2'
+version '1.0.3'
 
 shared_scripts {'@es_extended/imports.lua', 'config.lua', '@ox_lib/init.lua'}
 
