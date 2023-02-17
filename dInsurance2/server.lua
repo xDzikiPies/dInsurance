@@ -43,6 +43,33 @@ TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
             TriggerClientEvent('dInsurance:customNotify', source,  Config['Lang']['MissingMoney']..missingmoney.."$")
         end
     end)
+
+    RegisterCommand('checkplate', function(source, args)
+        local xPlayer = ESX.GetPlayerFromId(source)
+        if xPlayer.job.name == Config.JobName then 
+            local plate = table.concat(args, " ")
+            MySQL.Async.fetchAll("SELECT plate FROM owned_vehicles WHERE insurance = 1", {}, function(result)
+                print(json.encode(result))
+                if #result > 0 then 
+                    local found = false
+                    for _, vehicle in ipairs(result) do
+                        if vehicle.plate == plate then 
+                            TriggerClientEvent('dInsurance:customNotify', source, Config['Lang']['VehicleFound'])
+                            found = true
+                            break
+                        end
+                    end
+                    if not found then
+                        TriggerClientEvent('dInsurance:customNotify', source, Config['Lang']['VehicleNotInsured'])
+                    end
+                else
+                    TriggerClientEvent('dInsurance:customNotify', source, Config['Lang']['VehicleNotFound'])
+                end
+            end)
+        else
+            TriggerClientEvent('dInsurance:customNotify', source, Config['Lang']['Unauthorized'])
+        end
+    end)
 else
     print('You didnt set your item name!')
 end

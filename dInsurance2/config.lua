@@ -6,6 +6,8 @@ Config.Price = 1500 -- Price of Insurance
 
 Config.Item = 'insurance'
 
+Config.JobName = 'police'
+
 Config.Markers = {
 	{
 		coords = vector3(-1079.6155, -255.3278, 37.7633),
@@ -74,4 +76,8 @@ Config['Lang'] = {
 ['Title2'] = 'Buy insurance',
 ['Accept'] = 'Accept',
 ['Decline'] = 'Decline',
+['VehicleFound'] = 'This vehicle is insured!',
+['VehicleNotInsured'] = 'This vehicle is not insured!',
+['VehicleNotFound'] = 'Couldnt find this vehicle in database!',
+['Unauthorized'] = 'You are not allowed to use this command!',
 }
