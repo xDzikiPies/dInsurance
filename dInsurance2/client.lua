@@ -1,70 +1,75 @@
 menuOpen = false 
 menuopen = false
-RegisterNetEvent('dInsurance:openInsuranceShop')
-AddEventHandler('dInsurance:openInsuranceShop', function()
-	OpenKeyShopMenu()
+ESX = nil 
+Citizen.CreateThread(function()
+	while ESX == nil do
+		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+		Citizen.Wait(0)
+	end
 end)
 
-function OpenKeyShopMenu()
-	local playerPed  = PlayerPedId()
-	local elements = {}
-	
+
+RegisterNetEvent('dInsurance:openInsuranceShop')
+AddEventHandler('dInsurance:openInsuranceShop', function()
+	OpenKeyShop()
+end)
+
+function OpenKeyShop()
 	ESX.TriggerServerCallback("dInsurance:getData", function(vehicles)
-		
-        for k, v in pairs(vehicles) do
-            table.insert(elements, {label = v.plate, ins = v.insurance})
-        end
-		ESX.UI.Menu.Open('default', GetCurrentResourceName(), "shop_main_menu",
-			{
-				title    = Config['Lang']['Title2'],
-				align    = "center",
-				elements = elements
-			},
-		function(data, menu)
-			menu.close()
-			OpenRegisterCarMenu(data.current.label, data.current.ins)
-		end, function(data, menu)
-			menu.close()
-			ESX.UI.Menu.CloseAll()
-			menuopen = false
-			menuOpen = false
-		end)
+
+		local options = {}
+
+		for k, v in pairs(vehicles) do
+			options[v.plate] = {
+				event = 'dInsurance:yesorno',
+				args = {
+					plate = v.plate
+				},
+				arrow = true
+			}
+		end
+
+		lib.registerContext({
+			onExit = function()
+				menuOpen = false
+				menuopen = false
+			end,
+			id = 'dInsurance_shop',
+			title = Config['Lang']['Title2'],
+			options = options
+		})
+		lib.showContext('dInsurance_shop')
 	end)
 end
 
--- Function to confirm registering a new key
-function OpenRegisterCarMenu(plate)	
-	local elements = {
-		{ label = Config['Lang']['Accept'], value = "reg_accept" },
-		{ label = Config['Lang']['Decline'], value = "reg_decline" },
-	}
-	
-	ESX.UI.Menu.Open('default', GetCurrentResourceName(), "register_car_confirm",
-		{
-			title    = Config['Lang']['Title']..tostring(Config.Price),
-			align    = "center",
-			elements = elements
-		},
-	function(data, menu)
-		if(data.current.value == 'reg_accept') then
-			TriggerServerEvent('dInsurance:registerNewCar', plate)
-			menuopen = false
-			menu.close()
-			ESX.UI.Menu.CloseAll()
-			menuOpen = false
-		end
-		if(data.current.value == 'reg_decline') then
-			menu.close()
-			TriggerEvent('dInsurance:customNotify', Config['Lang']['Cancelled'])
-			OpenKeyShopMenu()
-		end
-		menu.close()
-	end, function(data, menu)
-		menu.close()
-		OpenKeyShopMenu()
-	end)
-end
 
+AddEventHandler('dInsurance:yesorno', function(data)
+    lib.hideContext(false)
+    lib.registerContext({
+        id = 'dInsurance_yesorno',
+        title = Config['Lang']['Title'],
+        options = {
+            {
+                title = Config['Lang']['Accept'],
+                event = 'dInsurance:buykeylol',
+                args = {
+                    plate = data.plate
+                }
+            },
+            {
+                title = Config['Lang']['Decline'],
+                menu = 'dInsurance_shop'
+            }
+        }
+    })
+    lib.showContext('dInsurance_yesorno')
+end)
+
+AddEventHandler('dInsurance:buykeylol', function(data)
+    TriggerServerEvent('dInsurance:registerNewCar', data.plate)
+	menuOpen = false
+	menuopen = false
+end)
 
 if Config.Marker then 
 	Citizen.CreateThread(function()
@@ -90,7 +95,7 @@ if Config.Marker then
 				ESX.ShowHelpNotification(Config.Markers[markerIndex].helpText, false, true, 5000)
 				if IsControlJustPressed(0, Config.Markers[markerIndex].button) then
 					menuopen = true 
-					OpenKeyShopMenu()
+					OpenKeyShop()
 				end
 			else 
 				menuopen = false
