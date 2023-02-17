@@ -11,10 +11,108 @@ end)
 
 RegisterNetEvent('dInsurance:openInsuranceShop')
 AddEventHandler('dInsurance:openInsuranceShop', function()
+	OpenMainMenu()
+end)
+
+
+function OpenMainMenu()
+	lib.registerContext({
+        id = 'dInsurance_main',
+        title = Config['Lang']['Title'],
+        options = {
+            {
+                title = Config['Lang']['BuyInsurance'],
+                event = 'dInsurance:buyIns'
+            },
+            {
+                title = Config['Lang']['BuyCopy'],
+                event = 'dInsurance:buyCopy'
+            },
+			{
+                title = Config['Lang']['RemoveInsurance'],
+                event = 'dInsurance:removeInsurance123'
+            },
+        }
+    })
+	lib.showContext('dInsurance_main')
+
+end
+
+
+function OpenRemoveShop()
+	lib.hideContext(false)
+	ESX.TriggerServerCallback("dInsurance:getDataRemove", function(vehicles)
+
+		local options = {}
+
+		for k, v in pairs(vehicles) do
+			options[v.plate] = {
+				event = 'dInsuranceRemove:yesorno',
+				args = {
+					plate = v.plate
+				},
+				arrow = true
+			}
+		end
+
+		lib.registerContext({
+			onExit = function()
+				menuOpen = false
+				menuopen = false
+			end,
+			id = 'dInsuranceRemove_shop',
+			title = Config['Lang']['RemoveTitle2'],
+			options = options
+		})
+		lib.showContext('dInsuranceRemove_shop')
+	end)
+end
+
+AddEventHandler('dInsurance:buyIns', function()
 	OpenKeyShop()
 end)
 
+AddEventHandler('dInsurance:buyCopy', function()
+	OpenKeyCopy()
+end)
+
+AddEventHandler('dInsurance:removeInsurance123', function()
+	OpenRemoveShop()
+end)
+
+function OpenKeyCopy()
+	lib.hideContext(false)
+	ESX.TriggerServerCallback("dInsurance:getDataRemove", function(vehicles)
+
+		local options = {}
+
+		for k, v in pairs(vehicles) do
+			options[v.plate] = {
+				event = 'dInsurance:yesorno',
+				args = {
+					plate = v.plate
+				},
+				arrow = true
+			}
+		end
+
+		lib.registerContext({
+			onExit = function()
+				menuOpen = false
+				menuopen = false
+			end,
+			id = 'dInsurance_Copy',
+			title = Config['Lang']['Title2'],
+			options = options
+		})
+		lib.showContext('dInsurance_Copy')
+	end)
+end
+
+
+
 function OpenKeyShop()
+	lib.hideContext(false)
 	ESX.TriggerServerCallback("dInsurance:getData", function(vehicles)
 
 		local options = {}
@@ -65,8 +163,38 @@ AddEventHandler('dInsurance:yesorno', function(data)
     lib.showContext('dInsurance_yesorno')
 end)
 
+
+AddEventHandler('dInsuranceRemove:yesorno', function(data)
+    lib.hideContext(false)
+    lib.registerContext({
+        id = 'dInsuranceRemove_yesorno',
+        title = Config['Lang']['RemoveTitle'],
+        options = {
+            {
+                title = Config['Lang']['Accept'],
+                event = 'dInsurance:removeInsurance',
+                args = {
+                    plate = data.plate
+                }
+            },
+            {
+                title = Config['Lang']['Decline'],
+                menu = 'dInsurance_main'
+            }
+        }
+    })
+    lib.showContext('dInsuranceRemove_yesorno')
+end)
+
+
 AddEventHandler('dInsurance:buykeylol', function(data)
     TriggerServerEvent('dInsurance:registerNewCar', data.plate)
+	menuOpen = false
+	menuopen = false
+end)
+
+AddEventHandler('dInsurance:removeInsurance', function(data)
+    TriggerServerEvent('dInsurance:removeInsurance', data.plate)
 	menuOpen = false
 	menuopen = false
 end)
@@ -95,7 +223,7 @@ if Config.Marker then
 				ESX.ShowHelpNotification(Config.Markers[markerIndex].helpText, false, true, 5000)
 				if IsControlJustPressed(0, Config.Markers[markerIndex].button) then
 					menuopen = true 
-					OpenKeyShop()
+					OpenMainMenu()
 				end
 			else 
 				menuopen = false
@@ -106,12 +234,14 @@ end
 
 
 
+
+
 if Config.Target then 
 	if Config.TargetName == '' then return print('You left your target name empty!') end 
 	if Config.TargetName == 'ox_target' then 
 		for i = 1, #Config.Targets do 
 			local target = Config.Targets[i]
-			exports.[Config.TargetName]:addBoxZone({
+			exports[Config.TargetName]:addBoxZone({
 				coords = vec3(target.x, target.y, target.z),
 				size = vec3(target.width, target.length, 2),
 				rotation = 45,

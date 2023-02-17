@@ -44,6 +44,18 @@ TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
         end
     end)
 
+    RegisterServerEvent('dInsurance:removeInsurance')
+    AddEventHandler('dInsurance:removeInsurance', function(plate)
+        local xPlayer = ESX.GetPlayerFromId(source)
+        local data = os.date('*t')
+        if not xPlayer then return end 
+        MySQL.Async.execute("UPDATE owned_vehicles SET insurance = 0 WHERE plate = @plate", {
+            ['@plate'] = plate,
+        }, function()
+        end) 
+        TriggerClientEvent('dInsurance:customNotify', source, Config['Lang']['YouRemoved'])
+    end)
+
     RegisterCommand('checkplate', function(source, args)
         local xPlayer = ESX.GetPlayerFromId(source)
         if xPlayer.job.name == Config.JobName then 
@@ -70,6 +82,22 @@ TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
             TriggerClientEvent('dInsurance:customNotify', source, Config['Lang']['Unauthorized'])
         end
     end)
+
+
+    ESX.RegisterServerCallback('dInsurance:getDataRemove', function(source, cb)
+        local xPlayer = ESX.GetPlayerFromId(source)
+        if not xPlayer then return end
+        local cars = {}
+        MySQL.Async.fetchAll("SELECT plate, insurance FROM owned_vehicles WHERE owner = @owner AND insurance = 1", {
+            ['@owner'] = xPlayer.identifier,
+        }, function(result)
+            for _, v in pairs(result) do
+                table.insert(cars, {plate = v.plate, ins = v.insurance})
+            end
+            cb(cars)
+        end)
+    end)
+
 else
     print('You didnt set your item name!')
 end

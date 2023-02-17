@@ -80,4 +80,10 @@ Config['Lang'] = {
 ['VehicleNotInsured'] = 'This vehicle is not insured!',
 ['VehicleNotFound'] = 'Couldnt find this vehicle in database!',
 ['Unauthorized'] = 'You are not allowed to use this command!',
+['BuyInsurance'] = 'Buy insurance',
+['BuyCopy'] = 'Buy copy of insurance', 
+['RemoveInsurance'] = 'Remove the insurance',
+['RemoveTitle2'] = 'Remove an insurance', 
+['YouRemoved'] = 'You have removed an insurance',
+['RemoveTitle'] = 'Remove an insurance',
 }
